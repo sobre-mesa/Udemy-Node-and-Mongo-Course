@@ -8,12 +8,6 @@ tourRouter
   .get(getAllTours)
   .post(newTour)
 
-// tourRouter
-//   .route('/:id')
-//   .get(getTour)
-//   .patch(updateTour)
-//   .delete(deleteTour)
-
   tourRouter.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
 module.exports = tourRouter;
