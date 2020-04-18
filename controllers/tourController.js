@@ -6,9 +6,20 @@ const throwError = (e, r) => r.status(400).json({
   message: e
 })
 
+let groomQueryObject = q => {
+  const queryObject = {... q}
+  const excludedFields = ['page', 'sort', 'limit', 'fields'];
+  excludedFields.forEach(el => delete queryObject[el]);
+  let queryStr = JSON.stringify(queryObject);
+  queryStr = queryStr.replace((/\b(gte|gt|lte|lt)\b/), x => `$${x}`);
+  return JSON.parse(queryStr);
+}
+
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    const query = Tour.find(groomQueryObject(req.query));
+    const tours = await query;
+
     res.status(200).json({
       status: 'success',
       results: tours.length,
