@@ -12,12 +12,18 @@ let groomQueryObject = q => {
   excludedFields.forEach(el => delete queryObject[el]);
   let queryStr = JSON.stringify(queryObject);
   queryStr = queryStr.replace((/\b(gte|gt|lte|lt)\b/), x => `$${x}`);
+
   return JSON.parse(queryStr);
 }
 
 exports.getAllTours = async (req, res) => {
   try {
-    const query = Tour.find(groomQueryObject(req.query));
+    let query = Tour.find(groomQueryObject(req.query));
+    let sort = req.query.sort;
+    if(sort){
+      let sortBy = sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    }
     const tours = await query;
 
     res.status(200).json({
@@ -29,6 +35,7 @@ exports.getAllTours = async (req, res) => {
     })
   }
   catch (err) {
+    console.log(err);
     throwError(err, res);
   }
 };
