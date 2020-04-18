@@ -1,10 +1,12 @@
 const fs = require('fs');
 const Tour = require('../models/tourModel');
 
-const throwError = (e, r) => r.status(400).json({
+const throwError = (e, r) => {
+  return r.status(400).json({
   status: 'failed',
-  message: e
+  message: e.message
 })
+}
 
 let groomQueryObject = q => {
   const queryObject = {... q}
@@ -23,11 +25,26 @@ exports.getAllTours = async (req, res) => {
 
     let sort = req.query.sort;
     query = sort ? query.sort(parse(sort)) : query;
-    
+
     let select = req.query.fields;
     query =  select ? query.select(parse(select)) : query.select("-__v");
 
+    let page = req.query.page * 1 || 1;
+    let limit = req.query.limit * 1 || 5;
+    let skip = ( page - 1 ) * limit;
+    const tourCount = await Tour.countDocuments();
+    if(skip > tourCount){
+      throw new Error('Page doesnt exist');
+    }
+    query =  query.skip(skip).limit(limit);
+    
+   
+
+
+
     const tours = await query;
+
+
 
     res.status(200).json({
       status: 'success',
