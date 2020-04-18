@@ -1,10 +1,6 @@
 const fs = require('fs');
-let tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
-let successfulRes = x => ({ 'status': 'success', 'data': x });
+const Tour = require('../models/tourModel');
 
-exports.checkId = (id, res) => {
-  if(id + 1 > tours.length) return res.status(404).json({ status: 'fail', message: 'invalid id' })
-}
 exports.getAllTours = (req, res) => {
   return res.status(200).json(successfulRes({ tours }));
 }
@@ -27,12 +23,21 @@ exports.deleteTour = (req, res) => {
   return res.status(200).json(successfulRes({ tour }));
 }
 
-exports.newTour = (req, res) => {
-  const id = tours[tours.length - 1].id + 1;
-  const tour = Object.assign({ id }, req.body);
-  tours.push(tour);
-  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
-    res.status(201).json(successfulRes({ tour }));
-  });
-  res.send('ok');
+exports.newTour = async (req, res) => {
+  try {
+    const newTour = await Tour.create(req.body);
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour
+      }
+    });
+  }
+  catch (err) {
+    res.status(400).json({
+      status: 'failed',
+      message: err
+    })
+  }
+
 }
