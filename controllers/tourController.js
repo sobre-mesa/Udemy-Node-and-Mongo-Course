@@ -17,13 +17,16 @@ let groomQueryObject = q => {
 }
 
 exports.getAllTours = async (req, res) => {
+  let parse = x => x.split(',').join(' ')
   try {
     let query = Tour.find(groomQueryObject(req.query));
+
     let sort = req.query.sort;
-    if(sort){
-      let sortBy = sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    }
+    query = sort ? query.sort(parse(sort)) : query;
+    
+    let select = req.query.fields;
+    query =  select ? query.select(parse(select)) : query.select("-__v");
+
     const tours = await query;
 
     res.status(200).json({
