@@ -8,6 +8,11 @@ tourRouter
   .get(getAllTours)
   .post(newTour)
 
+  tourRouter
+  .route('/t/:id')
+  .patch(updateTour)
+  .delete(deleteTour)
+
   tourRouter.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
   tourRouter.route('/tour-stats').get(getTourStats);

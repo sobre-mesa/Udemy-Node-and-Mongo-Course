@@ -23,7 +23,7 @@ const tourSchema = new mongoose.Schema({
   ratingQuantity: {
     type: Number,
     default: 4.5
-  }, 
+  },
   ratingAverage: {
     type: Number,
     default: 0
@@ -36,7 +36,7 @@ const tourSchema = new mongoose.Schema({
   summary: {
     type: String,
     required: [true, 'A tour must have a summary'],
-    trim: true 
+    trim: true
   },
   imageCover: {
     type: String,
@@ -48,7 +48,26 @@ const tourSchema = new mongoose.Schema({
     default: Date.now(),
     select: false
   },
-  startDates: [Date]
+  startDates: [Date],
+  secretTour: {
+    type: Boolean,
+    default: false
+  }
+},
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  })
+
+tourSchema.pre(/^find/, function(next) {
+  this.find({ secretTour: false });
+  this.start = Date.now();
+  next();
+})
+
+tourSchema.post(/^find/, function(docs, next) {
+  console.log(`Query took ${Date.now() - this.start} miliseconds!`);
+  next();
 })
 
 const Tour = mongoose.model('Tour', tourSchema);
