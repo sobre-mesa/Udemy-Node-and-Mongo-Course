@@ -55,17 +55,21 @@ const tourSchema = new mongoose.Schema({
   }
 },
   {
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toJSON: { virtuals: true }, //When converted to JSON, apply virtuals
+    toObject: { virtuals: true } //When converted to Object, apply virtuals
   })
 
-tourSchema.pre(/^find/, function(next) {
+tourSchema.virtual('cheap').get(function () {
+  return this.price < 1000; //Field that will not be persisted, but shown in responses
+})
+
+tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: false });
   this.start = Date.now();
   next();
 })
 
-tourSchema.post(/^find/, function(docs, next) {
+tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} miliseconds!`);
   next();
 })
