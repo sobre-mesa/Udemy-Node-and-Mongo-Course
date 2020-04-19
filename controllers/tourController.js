@@ -100,3 +100,43 @@ exports.newTour = async (req, res) => {
     throwError(err, res);
   }
 }
+
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { price: { $gt: 10 } }
+      },
+      {
+        $group: {
+          _id: { $toUpper: "$difficulty" }, //null to not group
+          numtours: { $sum: 1 }, //Counter
+          numRatings: { $sum: '$ratingQuantity' },
+          avgRating: { $avg: '$ratingAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        }
+      },
+      {
+        $sort: {
+          avgPrice: 1 //Need to use previous method aggregate fields, not original fields
+        }
+      },
+      {
+        $match: { _id: { $ne: 'EASY' } } //Can repeat pipelines
+      },
+    ]);
+    console.log(stats)
+    res.status(201).json({
+      status: 'success',
+      data: {
+        stats
+      }
+    });
+  }
+
+  catch (err) {
+    throwError(err, res);
+  }
+}
